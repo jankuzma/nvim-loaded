@@ -20,6 +20,14 @@ return {
 				"scss",
 				"sql",
 				"svelte",
+        "tsx",
+        "markdown",
+        "dockerfile",
+        "bash",
+        "comment",
+        "javascript",
+        "json",
+        "typescript",
 			},
 
 			-- matchup = {

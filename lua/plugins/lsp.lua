@@ -12,6 +12,7 @@ return {
 				"tailwindcss-language-server",
 				"typescript-language-server",
 				"css-lsp",
+        "prettier"
 			})
 		end,
 	},
@@ -122,7 +123,7 @@ return {
 								unusedLocalExclude = { "_*" },
 							},
 							format = {
-								enable = false,
+								enable = true,
 								defaultConfig = {
 									indent_style = "space",
 									indent_size = "2",
