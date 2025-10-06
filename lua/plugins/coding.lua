@@ -94,4 +94,24 @@ return {
 			table.insert(opts.sources, { name = "emoji" })
 		end,
 	},
+	{
+		"stevearc/conform.nvim",
+		opts = {
+			default_format_opts = {
+				timeout_ms = 3000,
+				async = false,
+				quiet = false,
+				lsp_format = "fallback",
+			},
+			formatters = {
+				prettier = {
+					cwd = function(ctx)
+						-- Find the closest package.json (for workspace root detection)
+						local found = vim.fs.find({ "package.json" }, { path = ctx.filename, upward = true })[1]
+						return found and vim.fs.dirname(found) or nil
+					end,
+				},
+			},
+		},
+	},
 }

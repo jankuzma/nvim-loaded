@@ -8,3 +8,6 @@ end
 vim.print = _G.dd
 
 require("config.lazy")
+
+-- Setup project-wide diagnostics
+require("config.project-diagnostics").setup()

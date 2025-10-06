@@ -12,7 +12,11 @@ return {
 				"tailwindcss-language-server",
 				"typescript-language-server",
 				"css-lsp",
-        "prettier"
+				"prettier",
+				"emmet-ls",
+				"eslint-lsp",
+				"tflint",
+				"terraform-ls",
 			})
 		end,
 	},
@@ -24,11 +28,101 @@ return {
 			inlay_hints = { enabled = false },
 			---@type lspconfig.options
 			servers = {
+				eslint = {
+					cmd = { "vscode-eslint-language-server", "--stdio" },
+					root_dir = function(fname)
+						local util = require("lspconfig.util")
+						
+						-- For Turborepo: find the workspace root first (turbo.json)
+						local workspace_root = util.root_pattern("turbo.json", "pnpm-workspace.yaml", "yarn.workspaces")(fname)
+						
+						if workspace_root then
+							-- Check if current file is in a package with its own eslint config
+							local package_root = util.root_pattern("eslint.config.js", "package.json")(fname)
+							if package_root and package_root ~= workspace_root then
+								return package_root
+							end
+							return workspace_root
+						end
+						
+						-- Fallback to standard eslint config detection
+						return util.root_pattern(
+							"eslint.config.js",
+							"eslint.config.mjs", 
+							"eslint.config.cjs",
+							"eslint.config.ts",
+							".eslintrc",
+							".eslintrc.js",
+							".eslintrc.cjs",
+							".eslintrc.yaml",
+							".eslintrc.yml",
+							".eslintrc.json",
+							"package.json"
+						)(fname)
+					end,
+					settings = {
+						workingDirectories = { mode = "auto" },
+						experimental = {
+							useFlatConfig = true,
+						},
+						validate = "on",
+						packageManager = "auto",
+						problems = {
+							shortenToSingleLine = false,
+						},
+						workspaceFolder = {
+							changeProcessCWD = true,
+						},
+					},
+					on_attach = function(client, bufnr)
+						-- Disable eslint formatting if you're using prettier
+						client.server_capabilities.documentFormattingProvider = false
+						client.server_capabilities.documentRangeFormattingProvider = false
+					end,
+				},
+				emmet_ls = {
+					filetypes = { "css", "html", "javascriptreact", "typescriptreact" },
+				},
 				cssls = {},
 				tailwindcss = {
 					root_dir = function(...)
 						return require("lspconfig.util").root_pattern(".git")(...)
 					end,
+					settings = {
+						tailwindCSS = {
+							configFile = "tailwind.config.js", -- Ensure this is correct
+							classAttributes = { "class", "className", "class:list", "classList", "ngClass" },
+							includeLanguages = {
+								-- Add these lines for JSX/TSX support
+								javascript = "javascript",
+								typescript = "typescript",
+								javascriptreact = "javascriptreact", -- Explicitly for .jsx
+								typescriptreact = "typescriptreact", -- Explicitly for .tsx
+
+								-- Your existing languages
+								eelixir = "html-eex",
+								elixir = "phoenix-heex",
+								eruby = "erb",
+								heex = "phoenix-heex",
+								html = "html",
+								htmlangular = "html",
+								tmpl = "html",
+							},
+							lint = {
+								cssConflict = "warning",
+								invalidApply = "error",
+								invalidConfigPath = "error",
+								invalidScreen = "error",
+								invalidTailwindDirective = "error",
+								invalidVariant = "error",
+								recommendedVariantOrder = "warning",
+							},
+							validate = true,
+							hovers = true, -- Recommended to explicitly enable
+							suggestions = true, -- Recommended to explicitly enable
+							emmet = true, -- Recommended for Emmet
+						},
+					},
 				},
 				tsserver = {
 					root_dir = function(...)
